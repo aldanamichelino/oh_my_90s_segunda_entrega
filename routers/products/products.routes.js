@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { Producto } = require('../../models/daos/index');
 const product = new Producto;
-// const { Product } = require('../../models/Product');
-// const product = new Product();
 
 const user = {
     isAdmin: true

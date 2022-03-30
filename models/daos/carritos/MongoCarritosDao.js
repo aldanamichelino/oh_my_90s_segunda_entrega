@@ -3,7 +3,7 @@ const { Schema } = require('mongoose');
 
 const carritosSchema = Schema({
     timestamp: {type: Date, min: Date.now()},
-    products: [{type: Schema.Types.ObjectId, ref: 'products'}],
+    products: [{type: Object, ref: 'products'}],
 });
 
 
@@ -12,7 +12,6 @@ class MongoCarritosDao extends ContenedorMongoDB {
         super('carts', carritosSchema);
     }
 
-    //acá van los métodos específicos del carro
 }
 
 module.exports = MongoCarritosDao;

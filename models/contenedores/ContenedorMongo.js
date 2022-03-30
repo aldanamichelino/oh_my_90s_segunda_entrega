@@ -37,7 +37,7 @@ class ContenedorMongoDB {
 
     async getById(id){
         try{
-            const document = await this.model.find({_id: id}, {__v: 0}).lean();
+            const document = await this.model.findOne({_id: id}, {__v: 0}).lean();
             if(!document){
                 throw new Error('El documento solicitado no existe en nuestra base de datos');
             } else {

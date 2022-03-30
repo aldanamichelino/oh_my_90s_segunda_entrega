@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "products": [
+      {
+        "name": "Gallinita de azúcar",
+        "description": "golosina de azúcar y cucurucho",
+        "code": "gallinita-900",
+        "image": "gallitina.jpeg",
+        "price": "60",
+        "stock": "100",
+        "timestamp": 1648589897805,
+        "id": "1"
+      }
+    ],
+    "id": "2"
+  }
+]

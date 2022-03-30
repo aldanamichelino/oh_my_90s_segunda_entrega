@@ -1,4 +1,0 @@
-{
-  "last_product_id": 0,
-  "last_cart_id": 0
-}

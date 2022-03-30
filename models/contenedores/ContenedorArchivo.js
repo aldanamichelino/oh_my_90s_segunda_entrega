@@ -1,128 +1,115 @@
 const fs = require('fs');
 
 class ContenedorArchivo{
-    constructor(config, table){
-        this.config = config;
-        this.table = table;
+    constructor(document){
+        this.document = document
+
+        console.log('Almacenamiento mediante archivos')
     }
 
-    async getProductsInCart(id) {
+    //CREATE
+    async save(item){
         try{
-            const carts = await fs.promises.readFile('./data/carts.txt', 'utf-8');
-            let cartsArray = JSON.parse(carts);
-            let cart = cartsArray.find(cart => cart.id === id);
+            if(item){
+                const documents = await fs.promises.readFile(`./db/archivos/${this.document}.txt`, 'utf-8');
+                const ids = await fs.promises.readFile(`./db/archivos/${this.document}_cached_ids.txt`, 'utf-8');
+                let documentsArray = JSON.parse(documents);
+                let cashedId = JSON.parse(ids);
+                
+                item.id = Number(ids) + 1;
+                cashedId = item.id;
+                documentsArray.push(item);
 
-            if(!cart){
-                return {error: 'Carrito no encontrado'};
-            } else {
-                return cart;
-            }
+                await fs.promises.writeFile(`./db/archivos/${this.document}.txt`, JSON.stringify(documentsArray, null, 2));
+                await fs.promises.writeFile(`./db/archivos/${this.document}_cached_ids.txt`, JSON.stringify(cashedId, null, 2));
 
-        } catch(error) {
-           return error.message;
-        }
-    }
-
-    async saveCart(cart){
-        try{
-            if(cart){
-                const cachedId = await fs.promises.readFile(`./data/cached_ids.txt`, 'utf-8');
-                const carts = await fs.promises.readFile('./data/carts.txt', 'utf-8');
-                const cachedIdsObject = JSON.parse(cachedId);
-                let cartsArray = JSON.parse(carts);
-
-                cart.id = cachedIdsObject.last_cart_id + 1;
-                cachedIdsObject.last_cart_id = cart.id;
-                cartsArray.push(cart);
-
-                await fs.promises.writeFile(`./data/carts.txt`, JSON.stringify(cartsArray, null, 2));
-                await fs.promises.writeFile('./data/cached_ids.txt', JSON.stringify(cachedIdsObject, null, 2));
-
-                return cart.id;
+                return item.id;
             }
         } catch(error) {
             return error.message;
         }
     }
 
-    async saveProductInCart(id, productId){
+    //READ
+    async getAll(){
         try{
-            if(id && productId){
-                const carts = await fs.promises.readFile('./data/carts.txt', 'utf-8');
-                let cartsArray = JSON.parse(carts);
-                const cartIndex = cartsArray.findIndex(cart => cart.id === id);
+            const documents = await fs.promises.readFile(`./db/archivos/${this.document}.txt`, 'utf-8');
+            let documentsArray = JSON.parse(documents);
+            return documentsArray;
 
-                const products = await fs.promises.readFile('./data/products.txt', 'utf-8');
-                let productsArray = JSON.parse(products);
-                let product = productsArray.find(product => product.id === productId);
-
-                if(cartIndex < 0){
-                    return {error: 'Carrito no encontrado'};
-                } else {
-                    if(!product){
-                        return {error: 'Producto no encontrado'};
-                    } else {
-                        cartsArray[cartIndex].products.push(product);
-                        await fs.promises.writeFile(`./data/carts.txt`, JSON.stringify(cartsArray, null, 2));
-
-                        return cartsArray;
-                    }
-                }
-            }
         } catch(error) {
-            return error.message;
+            console.log(`Hubo un error: ${error.message}`);
         }
     }
 
-    async deleteCart(id){
+    async getById(id){
         try{
             if(id){
-                const carts = await fs.promises.readFile('./data/carts.txt', 'utf-8');
-                let cartsArray = JSON.parse(carts);
-                let cartIndex = cartsArray.findIndex(cart => cart.id === id);
+                const documents = await fs.promises.readFile(`./db/archivos/${this.document}.txt`, 'utf-8');
+                let documentsArray = JSON.parse(documents);
+                let document = documentsArray.find(document => document.id == id);
 
-                if(cartIndex < 0){
-                    return {error: 'Carrito no encontrado'};
+                if(!document){
+                    return {error: 'El documento solicitado no se encuentra en nuestra base de datos'}
                 } else {
-                    cartsArray.splice(cartIndex, 1);
-                    await fs.promises.writeFile(`./data/carts.txt`, JSON.stringify(cartsArray, null, 2));
-                    return cartsArray;
+                    return document;
                 }
-
+        
             }
         } catch(error) {
-            return error.message;
+            console.log(`Hubo un error: ${error.message}`);
         }
     }
 
-    async deleteProductFromCart(id, productId){
+
+    //UPDATE
+
+    async update(id, newProductData){
+        if(id && newProductData){
+            try{
+                const documents = await fs.promises.readFile(`./db/archivos/${this.document}.txt`, 'utf-8');
+                let documentsArray = JSON.parse(documents);
+                let documentIndex = documentsArray.findIndex(document => document.id == id);
+
+                if(documentIndex < 0){
+                    return {error: 'El producto no existe'};
+                } else {
+                    newProductData.id = id;
+                    documentsArray[documentIndex] = newProductData;
+                    await fs.promises.writeFile(`./db/archivos/${this.document}.txt`, JSON.stringify(documentsArray, null, 2));
+                    return documentsArray;
+                }
+
+            } catch(error) {
+                console.log(`Hubo un error: ${error.message}`);
+            }
+        }
+    }
+
+
+    //DELETE
+    async delete(id){
         try{
-            if(id && productId){
-                const carts = await fs.promises.readFile('./data/carts.txt', 'utf-8');
-                let cartsArray = JSON.parse(carts);
-                const cartIndex = cartsArray.findIndex(cart => cart.id === id);
+            if(id){
+                const documents = await fs.promises.readFile(`./db/archivos/${this.document}.txt`, 'utf-8');
+                let documentsArray = JSON.parse(documents);
+                let documentIndex = documentsArray.findIndex(item => item.id === id);
 
-                if(cartIndex < 0){
+                if(documentIndex < 0){
                     return {error: 'Carrito no encontrado'};
                 } else {
-                    const productIndexInCart = cartsArray[cartIndex].products.findIndex(product => product.id === productId);
-
-                    if(productIndexInCart < 0){
-                        return {error: 'Producto no encontrado en carrito'};
-                    } else {
-                        cartsArray[cartIndex].products.splice(productIndexInCart, 1);
-                        await fs.promises.writeFile(`./data/carts.txt`, JSON.stringify(cartsArray, null, 2));
-                        return cartsArray[cartIndex];
-                    }
+                    documentsArray.splice(documentIndex, 1);
+                    await fs.promises.writeFile(`./db/archivos/${this.document}.txt`, JSON.stringify(documentsArray, null, 2));
+                    return documentsArray;
                 }
+
             }
         } catch(error) {
             return error.message;
         }
     }
+
 }
 
 
-module.exports = {
-    ContenedorArchivo
-}
+module.exports = ContenedorArchivo;

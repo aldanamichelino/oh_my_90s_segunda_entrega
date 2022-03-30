@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 module.exports = {
   env: {
     PORT: process.env.PORT || 8080,
-    PERS: process.env.PERS || 'Firebase'
+    PERS: process.env.PERS || 'MariaDB'
   },
   firebase_config: {
     credential: firebaseConfig
@@ -16,20 +16,14 @@ module.exports = {
   mongoDB_config: {
     db_uri: `mongodb+srv://amichelino:${process.env.DATABASE_PASSWORD}@ecommerce.jtfko.mongodb.net/ecommerce?retryWrites=true&w=majority`
   },
-  // sqlite: {
-  //   client: 'sqlite3',
-  //   connection: {
-  //       filename: path.resolve(__dirname, "./ecommerce.sqlite")
-  //   }
-  // },
-  // mariaDB: {
-  //     client: 'mysql',
-  //     connection: {
-  //         host : '127.0.0.1',
-  //         port : 3306,
-  //         user : 'root',
-  //         password : '',
-  //         database : 'test'
-  //     }
-  // }
+  mariaDB: {
+      client: 'mysql',
+      connection: {
+          host : '127.0.0.1',
+          port : 3306,
+          user : 'root',
+          password : '',
+          database : 'test'
+      }
+  }
 }

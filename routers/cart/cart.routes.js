@@ -4,10 +4,6 @@ const { Carrito, Producto } = require('../../models/daos/index');
 const carrito = new Carrito;
 const producto = new Producto;
 
-// const { Cart } = require('../../models/Cart');
-// const cart = new Cart();
-
-
 router.get('/:id/productos', (req, res) => {
     const { id } = req.params;
     if(id){
@@ -33,7 +29,7 @@ router.post('/', (req, res) => {
 
 });
 
-//modificar esta ruta para adaptarse al dao
+
 router.post('/:id/productos', async (req, res) => {
     const { params: { id }, body: { productId } } = req;
 
@@ -41,23 +37,26 @@ router.post('/:id/productos', async (req, res) => {
         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
     } else {
 
-        const existingProduct = await producto.getById(productId);
         const existingCart = await carrito.getById(id);
-        const cartProducts = existingCart.products;
+        const existingProduct = await producto.getById(productId);
+        
+        if(existingCart){
+            const cartProducts = existingCart.products;
+            
+            if(existingProduct){
+                existingProduct.id = productId;
+                cartProducts.push(existingProduct);
 
-        cartProducts.push(existingProduct);
-
-        if(existingProduct){
-            if(existingCart){
                 carrito.update(id, {products: cartProducts})
                 .then(response => {res.status(200).json({success: true, response: response})})
                 .catch(error => {res.status(500).json({success: false, error: error.message})});
+            } else {
+                return res.status(400).json({success: false, response: 'Producto no encontrado'});
             }
 
         } else {
-            return res.status(400).json({success: false, response: 'Producto no encontrado'});
-        }
-
+            return res.status(400).json({success: false, response: 'Carrito no encontrado'});
+        } 
     }
 });
 
@@ -75,7 +74,7 @@ router.delete('/:id', (req, res) =>{
     }
 });
 
-//modificar esta ruta para adaptarse al dao
+
 router.delete('/:id/productos/:id_prod', async (req, res) => {
     const { id, id_prod } = req.params;
 
@@ -83,22 +82,25 @@ router.delete('/:id/productos/:id_prod', async (req, res) => {
         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
     } else {
 
-        const existingProduct = await producto.getById(id_prod);
         const existingCart = await carrito.getById(id);
-        const cartProducts = existingCart.products;
-
-        if(existingProduct){
-            if(existingCart){
-                let producto = cartProducts.find(product => product.id == id_prod);
-                console.log(producto);
+        
+        if(existingCart){
+            const cartProducts = existingCart.products;
+            let productInCart = cartProducts.findIndex(product => product.id == id_prod);
+            
+            if(productInCart > -1){
+                cartProducts.splice(productInCart, 1);
 
                 carrito.update(id, {products: cartProducts})
-                .then(response => {res.status(200).json({success: true, response: response})})
-                .catch(error => {res.status(500).json({success: false, error: error.message})});
+                    .then(response => {res.status(200).json({success: true, response: response})})
+                    .catch(error => {res.status(500).json({success: false, error: error.message})});
+            } else {
+                return res.status(400).json({success: false, response: 'Producto no encontrado'});
             }
 
+            
         } else {
-            return res.status(400).json({success: false, response: 'Producto no encontrado'});
+            return res.status(400).json({success: false, response: 'Carrito no encontrado'});
         }
 
     }
