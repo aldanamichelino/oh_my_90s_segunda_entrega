@@ -1,9 +1,9 @@
-const { env: {PERS} } = require('../../config');
-
-const Carrito = require(`./carritos/${PERS}CarritosDao`);
-const Producto = require(`./productos/${PERS}ProductosDao`);
+const User = require('./users/UserDaoMongo')
+const Cart = require('./carts/CartDaoMongo');
+const Product = require('./products/ProductDaoMongo');
 
 module.exports = {
-    Carrito,
-    Producto
+    User,
+    Cart,
+    Product
 }

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { Producto } = require('../../models/daos/index');
-const product = new Producto;
+const { Product } = require('../../models/daos/index');
+const product = new Product;
 
 const user = {
     isAdmin: true
@@ -17,6 +17,7 @@ const isAdmin = (req, res, next) => {
 };
 
 router.get('/', (req, res) => {
+    const user = req.user;
     const { id } = req.query;
     if(id){
         if(id){
@@ -27,15 +28,31 @@ router.get('/', (req, res) => {
             return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
         }
     } else {
-        product.getAll()
-        .then(response => {res.status(200).json({success: true, response: response})})
-        .catch(error => {res.status(500).json({success: false, error: error.message})});
+        if(user) {
+            product.getAll()
+            .then(response => {res.render('main', {products: response, user: user, req: req})})
+            .catch(error => {res.status(500).json({success: false, error: error.message})});
+        } else {
+            res.redirect('/');
+        } 
     }
+});
+
+router.get('/salados', (req, res) => {
+    product.filterBy('sweet', false)
+    .then(response => {res.render('main', {products: response})})
+    .catch(error => {res.status(500).json({success: false, error: error.message})});
+});
+
+router.get('/dulces', (req, res) => {
+    product.filterBy('sweet', true)
+    .then(response => {res.render('main', {products: response})})
+    .catch(error => {res.status(500).json({success: false, error: error.message})});
 });
 
 
 router.post('/', isAdmin, (req, res) => {
-    const { name, description, code, image, price, stock } = req.body;
+    const { name, description, code, image, price, stock, sweet } = req.body;
 
     if(!name || !description || !code || !image || !price || !stock){
         return res.status(400).json({success: false, error: 'Ingrese todos los datos requeridos'});
@@ -47,6 +64,7 @@ router.post('/', isAdmin, (req, res) => {
             image,
             price,
             stock,
+            sweet,
             timestamp: Date.now()
         };
 

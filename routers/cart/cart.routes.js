@@ -1,32 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const { Carrito, Producto } = require('../../models/daos/index');
-const carrito = new Carrito;
-const producto = new Producto;
+const { Cart, Product } = require('../../models/daos/index');
+const carrito = new Cart;
+const producto = new Product;
 
-router.get('/:id/productos', (req, res) => {
-    const { id } = req.params;
-    if(id){
-        carrito.getById(id)
-            .then(response => {res.status(200).json({success: true, response: response})})
-            .catch(error => {res.status(500).json({success: false, error: error.message})})
+router.get('/', (req, res) => {
+    const user = req.user;
+    if(user){
+        const { id } = req.params;
+        if(id){
+            carrito.getById(id)
+                .then(response => {res.render('main', {cart: response, user: user, req: req})})
+                .catch(error => {res.status(500).json({success: false, error: error.message})})
 
         } else {
-            return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
+            res.render('main', {cart: [], user: user, req: req});
         }
+    } else {
+        res.redirect('/');
+    }
 });
 
 
-router.post('/', (req, res) => {
-    const newCart = {
-        products : []
-    };
-
-    carrito.save(newCart)
+router.post('/:product_id', (req, res) => {
+    const { product_id } = req.params;
+    carrito.createNewCart(req.user._id.str, product_id)
         .then(response => {res.status(200).json({success: true, response: response})})
         .catch(error => {res.status(500).json({success: false, error: error.message})});
-
-
 });
 
 
