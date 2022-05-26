@@ -44,15 +44,28 @@ router.get('/', (req, res) => {
 });
 
 router.get('/salados', (req, res) => {
-    product.filterBy('sweet', false)
-    .then(response => {res.render('main', {products: response})})
-    .catch(error => {res.status(500).json({success: false, error: error.message})});
+    const user = req.user;
+    if(user){
+        product.filterBy('sweet', false)
+            .then(response => {res.render('main', {products: response, user: user, req: req})})
+            .catch(error => {res.status(500).json({success: false, error: error.message})});
+    } else {
+        write('error', 'Sesión expirada');
+        res.redirect('/');
+    }
 });
 
 router.get('/dulces', (req, res) => {
-    product.filterBy('sweet', true)
-    .then(response => {res.render('main', {products: response})})
-    .catch(error => {res.status(500).json({success: false, error: error.message})});
+    const user = req.user;
+    if(user){
+        product.filterBy('sweet', true)
+        .then(response => {res.render('main', {products: response, user: user, req: req})})
+        .catch(error => {res.status(500).json({success: false, error: error.message})});
+    } else {
+        write('error', 'Sesión expirada');
+        res.redirect('/');
+    }
+
 });
 
 
