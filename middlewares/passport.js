@@ -3,6 +3,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const UserDao = require('../models/daos/users/UserDaoMongo');
 const User = new UserDao();
+const { write } = require('../config');
 
 
 const salt = async() => await bcrypt.genSalt(10);
@@ -19,7 +20,7 @@ async (email, password, done) => {
         const user = await User.getByEmail(email);
         const validPassword = await isValidPassword(user, password);
         if(!validPassword){
-            console.log('Usuario o contraseña inválidos');
+            write('error', 'Usuario o contraseña inválidos');       
             return done(null, false);
         }
         return done(null, user);
@@ -50,7 +51,7 @@ passport.use('register', new LocalStrategy({
             const user = await User.createUser(userObject);
             return done(null, user);
        } catch(error) {
-            console.log('Error signing up >>>', error);
+            write('error', 'Error al registrarte');
             return done(error);
        };
     }

@@ -1,17 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const { Cart, Product } = require('../../models/daos/index');
-const carrito = new Cart;
-const producto = new Product;
+const cart = new Cart;
+const product = new Product;
+const {cart_statuses} = require('../../config');
+// const cartUtils = require('../../utils/cart.utils');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     const user = req.user;
     if(user){
-        const { id } = req.params;
-        if(id){
-            carrito.getById(id)
-                .then(response => {res.render('main', {cart: response, user: user, req: req})})
-                .catch(error => {res.status(500).json({success: false, error: error.message})})
+        const userCart = await cart.getCartByUserId(user._id, cart_statuses.CART_IN_PROCESS);
+
+        if(userCart){
+            const productPromises = userCart.products.map((item) => {
+                return product.getById(item);
+            });
+
+            const productsInCart = await Promise.all(productPromises);
+    
+            res.render('main', {productsInCart: productsInCart, user: user, req: req});
 
         } else {
             res.render('main', {cart: [], user: user, req: req});
@@ -24,8 +31,9 @@ router.get('/', (req, res) => {
 
 router.post('/:product_id', (req, res) => {
     const { product_id } = req.params;
-    carrito.createNewCart(req.user._id.str, product_id)
-        .then(response => {res.status(200).json({success: true, response: response})})
+    const user = req.user._id;
+    cart.createNewCart(user, product_id)
+        .then(response => {res.status(200).redirect('/api/productos')})
         .catch(error => {res.status(500).json({success: false, error: error.message})});
 });
 
@@ -37,8 +45,8 @@ router.post('/:id/productos', async (req, res) => {
         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
     } else {
 
-        const existingCart = await carrito.getById(id);
-        const existingProduct = await producto.getById(productId);
+        const existingCart = await cart.getById(id);
+        const existingProduct = await product.getById(productId);
         
         if(existingCart){
             const cartProducts = existingCart.products;
@@ -47,7 +55,7 @@ router.post('/:id/productos', async (req, res) => {
                 existingProduct.id = productId;
                 cartProducts.push(existingProduct);
 
-                carrito.update(id, {products: cartProducts})
+                cart.update(id, {products: cartProducts})
                 .then(response => {res.status(200).json({success: true, response: response})})
                 .catch(error => {res.status(500).json({success: false, error: error.message})});
             } else {
@@ -65,7 +73,7 @@ router.delete('/:id', (req, res) =>{
     const { id } = req.params;
 
     if(id){
-        carrito.delete(id)
+        cart.delete(id)
             .then(response => {res.status(200).json({success: true, response: response})})
             .catch(error => {res.status(500).json({success: false, error: error.message})});
 
@@ -82,7 +90,7 @@ router.delete('/:id/productos/:id_prod', async (req, res) => {
         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
     } else {
 
-        const existingCart = await carrito.getById(id);
+        const existingCart = await cart.getById(id);
         
         if(existingCart){
             const cartProducts = existingCart.products;
@@ -91,7 +99,7 @@ router.delete('/:id/productos/:id_prod', async (req, res) => {
             if(productInCart > -1){
                 cartProducts.splice(productInCart, 1);
 
-                carrito.update(id, {products: cartProducts})
+                cart.update(id, {products: cartProducts})
                     .then(response => {res.status(200).json({success: true, response: response})})
                     .catch(error => {res.status(500).json({success: false, error: error.message})});
             } else {

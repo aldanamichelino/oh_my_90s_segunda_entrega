@@ -1,5 +1,6 @@
 const MongoContainer = require("../../containers/MongoContainer");
 const { Schema } = require('mongoose');
+const { write } = require('../../../config');
 
 
 const UserSchema = new Schema({
@@ -43,7 +44,7 @@ class UsersDao extends MongoContainer {
                 return user;
             }
         }catch(error){
-            console.log(error.message);
+            write('error', `Error: ${error.message}`);
         }
     }
 
@@ -53,6 +54,7 @@ class UsersDao extends MongoContainer {
             const document = await this.model.findById(id, {__v: 0}).lean();
             if(!document){
                 const errorMessage = `El usuario con el id ${id} no existe en nuestros registros`;
+                write('error', `Error: ${errorMessage}`);
                 throw new Error(JSON.stringify(errorMessage));
             } else {
                 return document;
@@ -69,6 +71,7 @@ class UsersDao extends MongoContainer {
             const document = await this.model.findOne({email}, {__v: 0}).lean();
             if(!document){
                 const errorMessage = `Nombre de usuario o contraseña inválidos`;
+                write('error', `Error: ${errorMessage}`);
                 throw new Error(JSON.stringify(errorMessage));
             } else {
                 return document;

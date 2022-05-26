@@ -1,5 +1,6 @@
 const MongoContainer = require("../../containers/MongoContainer");
 const { Schema } = require("mongoose");
+const { write } = require('../../../config');
 
 const productSchema = new Schema({
     name: {type: String, required: true},
@@ -25,7 +26,7 @@ class ProductDaoMongo extends MongoContainer {
             const documents = await this.model.find(object, {__v: 0}).lean();
             return documents;
         } catch(error){
-            console.log(error.message);
+            write('error', `Error: ${error.message}`);
         }
     }
 }

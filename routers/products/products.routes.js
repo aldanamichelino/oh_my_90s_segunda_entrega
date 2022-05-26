@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Product } = require('../../models/daos/index');
 const product = new Product;
+const { write } = require('../../config');
+
 
 const user = {
     isAdmin: true
@@ -12,6 +14,7 @@ const isAdmin = (req, res, next) => {
     if(user.isAdmin){
         next();
     } else {
+        write('error', `ruta ${req.originalUrl} método ${req.method} no autorizada`);
         res.status(403).json({error: -1, descripcion: `ruta ${req.originalUrl} método ${req.method} no autorizada`});  
     }
 };
@@ -25,6 +28,7 @@ router.get('/', (req, res) => {
                 .then(response => {res.status(200).json({success: true, response: response})})
                 .catch(error => {res.status(500).json({success: false, error: error.message})});
         } else {
+            write('error', 'Por favor, ingrese un id válido');
             return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
         }
     } else {
@@ -33,6 +37,7 @@ router.get('/', (req, res) => {
             .then(response => {res.render('main', {products: response, user: user, req: req})})
             .catch(error => {res.status(500).json({success: false, error: error.message})});
         } else {
+            write('error', 'Sesión expirada');
             res.redirect('/');
         } 
     }
@@ -80,6 +85,7 @@ router.put('/:id', isAdmin, (req, res) => {
     const { params: {id}, body: {name, description, code, image, price, stock} } = req;
 
     if(!name || !description || !code || !image || !price || !stock){
+        write('error', 'Ingrese todos los datos requeridos');
         return res.status(400).json({success: false, error: 'Ingrese todos los datos requeridos'});
     } else {
         if(id){
@@ -98,6 +104,7 @@ router.put('/:id', isAdmin, (req, res) => {
             .catch(error => {res.status(500).json({success: false, error: error.message})});
                 
         } else {
+            write('error', 'Por favor, ingrese un id válido');
             return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
         }
     }
@@ -112,6 +119,7 @@ router.delete('/:id', isAdmin, (req, res) => {
                 .then(response => {res.status(200).json({success: true, response: response})})
                 .catch(error => {res.status(500).json({success: false, error: error.message})})
     } else {
+        write('error', 'Por favor, ingrese un id válido');
         return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
     }
 });

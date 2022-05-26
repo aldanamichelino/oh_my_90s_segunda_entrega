@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const { mongoDB_config } = require('../../config');
+const { write } = require('../../config');
 
 class MongoContainer {
     constructor(collection, schema) {
         if(!mongoose.connection.readyState){
-            this.connect().then(() => console.log('Database connected'));
+            this.connect().then(() => write('info', 'Database connected'));
         }
 
         this.model = mongoose.model(collection, schema);
@@ -21,7 +22,7 @@ class MongoContainer {
             const newDocument = new this.model(object);
             return await newDocument.save();
         } catch(error){
-            console.log(error.message);
+            write('error', `Error: ${error.message}`);
         }
     }
 
@@ -31,7 +32,7 @@ class MongoContainer {
             const documents = await this.model.find({}, {__v: 0}).lean();
             return documents;
         } catch(error){
-            console.log(error.message);
+            write('error', `Error: ${error.message}`);
         }
     }
 
@@ -39,12 +40,13 @@ class MongoContainer {
         try{
             const document = await this.model.findOne({_id: id}, {__v: 0}).lean();
             if(!document){
+                write('error', 'El documento solicitado no existe en nuestra base de datos');
                 throw new Error('El documento solicitado no existe en nuestra base de datos');
             } else {
                 return document;
             }
         } catch(error) {
-            console.log(error.message);
+            write('error', `Error: ${error.message}`);
         }
     }
 
@@ -53,12 +55,13 @@ class MongoContainer {
         try{
             const updatedDocument = await this.model.updateOne({_id: id}, {$set: {...newDataObject}});
             if(!updatedDocument.matchedCount){
+                write('error', 'El documento solicitado no existe en nuestra base de datos');
                 throw new Error('El documento solicitado no existe en nuestra base de datos');
             } else {
                 return updatedDocument;
             }
         } catch(error) {
-            console.log(error);
+            write('error', `Error: ${error.message}`);
         }
     }
 
@@ -67,7 +70,7 @@ class MongoContainer {
         try{
             return await this.model.deleteOne({_id: id});
         } catch(error){
-            console.log(error)
+            write('error', `Error: ${error.message}`);
         }
     }
 }
