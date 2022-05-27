@@ -5,7 +5,12 @@ const { write } = require('../../../config');
 
 
 const cartSchema = Schema({
-    products: [{type: Schema.Types.ObjectId, ref: 'products'}],
+    products: [
+        {
+            product_id : {type: Schema.Types.ObjectId, ref: 'products'},
+            quantity: {type: Number}
+        }
+    ],
     user_id: {type: Schema.Types.ObjectId, ref: 'users'},
     status: {type: String},
     timestamp: {type: Date, min: Date.now()}
@@ -17,17 +22,24 @@ class CartDaoMongo extends MongoContainer {
         super('carts', cartSchema);
     }
 
-    async createNewCart(user_id, product_id){
+    async createNewCart(user_id, product_id, quantity){
         try{
-            const cart = await this.getCartByUserId(user_id, cart_statuses.CART_IN_PROCESS);
+            let cart = await this.getCartByUserId(user_id, cart_statuses.CART_IN_PROCESS);
 
             if(cart){
-                cart.products.push(product_id);
+                const existingProductIndex = cart.products.findIndex((product) => product.product_id == product_id);
+
+                if(existingProductIndex > -1){
+                    cart.products[existingProductIndex].quantity += +quantity;
+                } else {
+                    cart.products.push({product_id, quantity});
+                }
+
                 this.update(cart._id, cart);
                 return cart;
             } else {
                 const newCart = {
-                    products : [product_id],
+                    products : [{product_id, quantity}],
                     user_id: user_id,
                     status: 'in process'
                 };
@@ -55,6 +67,30 @@ class CartDaoMongo extends MongoContainer {
             write('error', `Error: ${error.message}`);
         }
 
+    }
+
+    async deleteProductFromCart(user_id, product_id){
+        try {  
+
+            let cart = await this.getCartByUserId(user_id, cart_statuses.CART_IN_PROCESS);
+
+            if (!cart) {
+                return { success: false, error: 'Carrito no encontrado' };
+            }
+        
+            const existingProductIndex = cart.products.findIndex((product) => product.product_id == product_id);
+    
+            if(existingProductIndex > -1) {
+                cart.products.splice(existingProductIndex, 1);
+            }
+            
+            this.update(cart._id, cart);
+
+            return cart;
+    
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 
 }

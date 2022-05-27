@@ -30,7 +30,6 @@ const initServer = () => {
         }
     }));
 
-    //es necesario setear esto debajo de la session de express
     app.use(passport.initialize());
     app.use(passport.session());
 

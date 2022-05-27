@@ -4,7 +4,6 @@ const { Cart, Product } = require('../../models/daos/index');
 const cart = new Cart;
 const product = new Product;
 const {cart_statuses} = require('../../config');
-// const cartUtils = require('../../utils/cart.utils');
 
 router.get('/', async (req, res) => {
     const user = req.user;
@@ -13,7 +12,7 @@ router.get('/', async (req, res) => {
 
         if(userCart){
             const productPromises = userCart.products.map((item) => {
-                return product.getById(item);
+                return product.getById(item.product_id);
             });
 
             const productsInCart = await Promise.all(productPromises);
@@ -21,7 +20,7 @@ router.get('/', async (req, res) => {
             res.render('main', {productsInCart: productsInCart, user: user, req: req});
 
         } else {
-            res.render('main', {cart: [], user: user, req: req});
+            res.render('main', {productsInCart: [], user: user, req: req});
         }
     } else {
         res.redirect('/');
@@ -29,10 +28,10 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/:product_id', (req, res) => {
-    const { product_id } = req.params;
-    const user = req.user._id;
-    cart.createNewCart(user, product_id)
+router.post('/:product_id/', (req, res) => {
+    const { params: { product_id }, body: { quantity } } = req;
+    const user_id = req.user._id;
+    cart.createNewCart(user_id, product_id, quantity)
         .then(response => {res.status(200).redirect('/api/productos')})
         .catch(error => {res.status(500).json({success: false, error: error.message})});
 });
@@ -69,12 +68,13 @@ router.post('/:id/productos', async (req, res) => {
 });
 
 
-router.delete('/:id', (req, res) =>{
-    const { id } = req.params;
+router.delete('/:product_id', (req, res) =>{
+    const { product_id } = req.params;
+    const user_id = req.user._id;
 
-    if(id){
-        cart.delete(id)
-            .then(response => {res.status(200).json({success: true, response: response})})
+    if(product_id){
+        cart.deleteProductFromCart(user_id, product_id)
+            .then(response => {res.redirect('/api/carrito')})
             .catch(error => {res.status(500).json({success: false, error: error.message})});
 
     } else {
@@ -83,35 +83,35 @@ router.delete('/:id', (req, res) =>{
 });
 
 
-router.delete('/:id/productos/:id_prod', async (req, res) => {
-    const { id, id_prod } = req.params;
+// router.delete('/:id/productos/:id_prod', async (req, res) => {
+//     const { id, id_prod } = req.params;
 
-    if(!id_prod){
-        return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
-    } else {
+//     if(!id_prod){
+//         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
+//     } else {
 
-        const existingCart = await cart.getById(id);
+//         const existingCart = await cart.getById(id);
         
-        if(existingCart){
-            const cartProducts = existingCart.products;
-            let productInCart = cartProducts.findIndex(product => product.id == id_prod);
+//         if(existingCart){
+//             const cartProducts = existingCart.products;
+//             let productInCart = cartProducts.findIndex(product => product.id == id_prod);
             
-            if(productInCart > -1){
-                cartProducts.splice(productInCart, 1);
+//             if(productInCart > -1){
+//                 cartProducts.splice(productInCart, 1);
 
-                cart.update(id, {products: cartProducts})
-                    .then(response => {res.status(200).json({success: true, response: response})})
-                    .catch(error => {res.status(500).json({success: false, error: error.message})});
-            } else {
-                return res.status(400).json({success: false, response: 'Producto no encontrado'});
-            }
+//                 cart.update(id, {products: cartProducts})
+//                     .then(response => {res.status(200).json({success: true, response: response})})
+//                     .catch(error => {res.status(500).json({success: false, error: error.message})});
+//             } else {
+//                 return res.status(400).json({success: false, response: 'Producto no encontrado'});
+//             }
 
             
-        } else {
-            return res.status(400).json({success: false, response: 'Carrito no encontrado'});
-        }
+//         } else {
+//             return res.status(400).json({success: false, response: 'Carrito no encontrado'});
+//         }
 
-    }
-});
+//     }
+// });
 
 module.exports = router;

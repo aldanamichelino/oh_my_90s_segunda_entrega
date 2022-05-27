@@ -44,10 +44,12 @@
                                   </p>
                                 </div>
                                 <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
-                                  <button type="button" class="btn btn-primary btn-sm me-1 mb-2" data-mdb-toggle="tooltip"
+                                  <form action="<%= `/api/carrito/${product._id}` %>" method="DELETE">
+                                      <button type="submit" class="btn btn-primary btn-sm me-1 mb-2" data-mdb-toggle="tooltip"
                                       title="Quitar">
                                       <i class="fas fa-trash"></i>
                                   </button>
+                                  </form>
                               </div>
                             </div>
                         <% }); %>
