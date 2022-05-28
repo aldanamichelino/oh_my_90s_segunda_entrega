@@ -4,6 +4,7 @@ const { Cart, Product } = require('../../models/daos/index');
 const cart = new Cart;
 const product = new Product;
 const {cart_statuses} = require('../../config');
+const Swal = require('sweetalert2')
 
 router.get('/', async (req, res) => {
     const user = req.user;
@@ -16,8 +17,19 @@ router.get('/', async (req, res) => {
             });
 
             const productsInCart = await Promise.all(productPromises);
-    
-            res.render('main', {productsInCart: productsInCart, user: user, req: req});
+            
+            const productsInCartData = productsInCart.map(product => {
+                
+                const item = userCart.products.find(productInCart => productInCart.product_id == product._id.toString());
+
+                product.quantity = item.quantity;
+
+                return product;
+            });
+
+            const totalSpent = productsInCartData.reduce((acc, item) => acc + item.quantity * item.price, 0);
+
+            res.render('main', {productsInCart: productsInCartData, totalSpent: totalSpent, user: user, req: req});
 
         } else {
             res.render('main', {productsInCart: [], user: user, req: req});
@@ -37,35 +49,35 @@ router.post('/:product_id/', (req, res) => {
 });
 
 
-router.post('/:id/productos', async (req, res) => {
-    const { params: { id }, body: { productId } } = req;
+// router.post('/:id/productos', async (req, res) => {
+//     const { params: { id }, body: { productId } } = req;
 
-    if(!productId){
-        return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
-    } else {
+//     if(!productId){
+//         return res.status(400).json({success: false, error: 'Por favor, elija un producto'});
+//     } else {
 
-        const existingCart = await cart.getById(id);
-        const existingProduct = await product.getById(productId);
+//         const existingCart = await cart.getById(id);
+//         const existingProduct = await product.getById(productId);
         
-        if(existingCart){
-            const cartProducts = existingCart.products;
+//         if(existingCart){
+//             const cartProducts = existingCart.products;
             
-            if(existingProduct){
-                existingProduct.id = productId;
-                cartProducts.push(existingProduct);
+//             if(existingProduct){
+//                 existingProduct.id = productId;
+//                 cartProducts.push(existingProduct);
 
-                cart.update(id, {products: cartProducts})
-                .then(response => {res.status(200).json({success: true, response: response})})
-                .catch(error => {res.status(500).json({success: false, error: error.message})});
-            } else {
-                return res.status(400).json({success: false, response: 'Producto no encontrado'});
-            }
+//                 cart.update(id, {products: cartProducts})
+//                 .then(response => {res.status(200).json({success: true, response: response})})
+//                 .catch(error => {res.status(500).json({success: false, error: error.message})});
+//             } else {
+//                 return res.status(400).json({success: false, response: 'Producto no encontrado'});
+//             }
 
-        } else {
-            return res.status(400).json({success: false, response: 'Carrito no encontrado'});
-        } 
-    }
-});
+//         } else {
+//             return res.status(400).json({success: false, response: 'Carrito no encontrado'});
+//         } 
+//     }
+// });
 
 
 router.delete('/:product_id', (req, res) =>{
@@ -74,7 +86,7 @@ router.delete('/:product_id', (req, res) =>{
 
     if(product_id){
         cart.deleteProductFromCart(user_id, product_id)
-            .then(response => {res.redirect('/api/carrito')})
+            .then(response => {res.status(200).json({success: true, response: response})})
             .catch(error => {res.status(500).json({success: false, error: error.message})});
 
     } else {
