@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const UserDao = require('../models/daos/users/UserDaoMongo');
 const User = new UserDao();
 const { write } = require('../config');
+require('dotenv').config();
+const { sendNotification } = require('../notifications/nodemailer.config');
 
 
 const salt = async() => await bcrypt.genSalt(10);
@@ -35,20 +37,42 @@ passport.use('register', new LocalStrategy({
     passReqToCallback: true
 },
     async (req, email, password, done) => {
+        const { name, address, age, phone } = req.body;
        try{
             const userObject = {
                 email: email,
                 password: await createHash(password),
-                name: req.body.name,
-                address: req.body.address,
-                age: req.body.age,
-                phone: req.body.phone,
+                name: name,
+                address: address,
+                age: age,
+                phone: phone,
                 avatar: req.file,
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
 
             const user = await User.createUser(userObject);
+
+            //new user notification to admin 
+            const mailOptions = {
+                from: "Tienda Sweet 90's",
+                to: process.env.ADMIN_EMAIL,
+                subject: "Nuevx usuarix registradx",
+                html: `<div>
+                            <h2>Se ha registrado unx nuevx usuarix</h2>
+                            <br>
+                            <ul>
+                                <li>Nombre: ${name}</li>
+                                <li>Email: ${email}</li>
+                                <li>Dirección: ${address}</li>
+                                <li>Whatsapp: ${phone}</li>
+                                <li>Edad: ${age}</li>
+                            </ul>
+                        </div>`
+            };
+
+            sendNotification(mailOptions);
+
             return done(null, user);
        } catch(error) {
             write('error', 'Error al registrarte');

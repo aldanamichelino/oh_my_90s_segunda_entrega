@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <div>
+        <h2><strong>Detalle del pedido</strong></h2>
+        <br>
+        <h4>Datos del usuarix</h4>
+        <div>
+            <p><strong><%= `Nombre: ${user.name}` %></strong></p>
+            <p><strong><%= `Email: ${user.email}` %></strong></p>
+        </div>
+        <ul>
+            <% products.forEach(product => {%>
+                <li style="list-style: none;"><%=`Producto: ${product.name}`%></li>
+                <li style="list-style: none;"><%=`Precio unitario: ${product.price}`%></li>
+                <li style="list-style: none;"><%=`Cantidad: ${product.quantity}`%></li>
+                <br>
+            <% }) %>
+        </ul>
+        <br>
+        <p><strong><%= `Total: $${totalSpent}` %></strong></p>
+    </div>
+</body>
+</html>

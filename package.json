@@ -22,9 +22,11 @@
     "mdb-ui-kit": "^4.0.0",
     "mongoose": "^6.2.8",
     "multer": "^1.4.4",
+    "nodemailer": "^6.7.5",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "sweetalert2": "^11.4.17",
+    "twilio": "^3.77.1",
     "winston": "^3.7.2"
   }
 }

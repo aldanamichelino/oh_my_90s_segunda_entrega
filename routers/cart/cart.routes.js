@@ -4,7 +4,11 @@ const { Cart, Product } = require('../../models/daos/index');
 const cart = new Cart;
 const product = new Product;
 const {cart_statuses} = require('../../config');
-const Swal = require('sweetalert2')
+require('dotenv').config();
+const { sendNotification } = require('../../notifications/nodemailer.config');
+const { sendSMS, sendWhatsapp } = require('../../notifications/twilio.config');
+const fs = require('fs');
+const ejs = require("ejs");
 
 router.get('/', async (req, res) => {
     const user = req.user;
@@ -48,6 +52,61 @@ router.post('/:product_id/', (req, res) => {
         .catch(error => {res.status(500).json({success: false, error: error.message})});
 });
 
+router.delete('/:product_id', (req, res) =>{
+    const { product_id } = req.params;
+    const user_id = req.user._id;
+
+    if(product_id){
+        cart.deleteProductFromCart(user_id, product_id)
+            .then(response => {res.status(200).json({success: true, response: response})})
+            .catch(error => {res.status(500).json({success: false, error: error.message})});
+
+    } else {
+        return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
+    }
+});
+
+router.get('/finalizarCompra', async (req, res) => {
+    const user = req.user;
+    const userCart = await cart.getCartByUserId(user._id, cart_statuses.CART_IN_PROCESS);
+
+    if(userCart){
+        const changeCartToPurchased = await cart.update(userCart._id, {'status': cart_statuses.CART_PURCHASED});
+        
+        if(changeCartToPurchased){
+            const productPromises = userCart.products.map((item) => {
+                return product.getById(item.product_id);
+            });
+    
+            const productsInCart = await Promise.all(productPromises);
+            const productsInCartData = productsInCart.map(product => {
+                const item = userCart.products.find(productInCart => productInCart.product_id == product._id.toString());
+                product.quantity = item.quantity;
+                return product;
+            });
+    
+            const totalSpent = productsInCartData.reduce((acc, item) => acc + item.quantity * item.price, 0);
+            
+            //new purchase email notification to admin
+            const data = await ejs.renderFile("notifications/newPurchase.ejs", { products: productsInCartData, user: user, totalSpent: totalSpent });
+            
+            const mailOptions = {
+                from: "Tienda Sweet 90's",
+                to: process.env.ADMIN_EMAIL,
+                subject: `Nuevo pedido de ${user.name} ${user.email}`,
+                html: data
+            };
+
+            sendNotification(mailOptions);
+            sendWhatsapp(process.env.ADMIN_WHATSAPP, `Nuevo pedido de ${user.name} ${user.email}`);
+            sendSMS(user.phone, 'Tu pedido fue recibido y se encuentra en proceso');
+
+            res.redirect('/api/productos');
+
+        }
+    }
+
+})
 
 // router.post('/:id/productos', async (req, res) => {
 //     const { params: { id }, body: { productId } } = req;
@@ -80,19 +139,6 @@ router.post('/:product_id/', (req, res) => {
 // });
 
 
-router.delete('/:product_id', (req, res) =>{
-    const { product_id } = req.params;
-    const user_id = req.user._id;
-
-    if(product_id){
-        cart.deleteProductFromCart(user_id, product_id)
-            .then(response => {res.status(200).json({success: true, response: response})})
-            .catch(error => {res.status(500).json({success: false, error: error.message})});
-
-    } else {
-        return res.status(400).json({success: false, response: 'Por favor, ingrese un id válido'});
-    }
-});
 
 
 // router.delete('/:id/productos/:id_prod', async (req, res) => {

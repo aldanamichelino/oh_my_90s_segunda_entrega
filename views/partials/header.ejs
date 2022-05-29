@@ -52,9 +52,10 @@
               <div class="d-flex">
               <img class="w-25 m-4" src="<%= `/uploads/${user.avatar.filename}` %>" alt="Avatar de usuario">
               <div class="mt-4">
+                  <p>Email: <%= user.email %></p>
+                  <p>Whatsapp: <%= user.phone %></p>
                   <p>Edad: <%= user.age %></p>
                   <p>Dirección de envío: <%= user.address %></p>
-                  <p>Whatsapp: <%= user.phone %></p>
               </div>
               </div>
           </div>
