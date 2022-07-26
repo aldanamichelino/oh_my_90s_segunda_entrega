@@ -20,9 +20,9 @@
                       </a>
                       <div class="d-flex justify-content-around align-items-center">
                         <h6 class="m-0 rounded-pill p-2 w-25 text-light" style="background: #bb24e6;"><%= `$${product.price}` %></h6>
-                        <form method="post" action="<%=`/api/carrito/${product._id}`%>" class="w-50">
+                        <form method="post" action="<%=`/api/carrito/${product._id}`%>" class="w-50 add-product-to-cart-form">
                           <input type="number" name="quantity" id="quantity" class="input-text qty" value="1" min="1" max="<%= product.stock %>" style="width: 50px;">
-                          <button type="submit" class="p-1 text-light w-25 rounded" style="background: #bb24e6; border: none;"><i class="fas fa-shopping-cart text-light"></i></button>
+                          <button data-item="<%= product._id %>" type="submit" class="p-1 text-light w-25 rounded add-product-to-cart" style="background: #bb24e6; border: none;"><i class="fas fa-shopping-cart text-light"></i></button>
                         </form>
                       </div>
                     </div>
@@ -35,3 +35,16 @@
     </div>
   </div>
 </section>
+
+<script>
+  const addProductForm = document.getElementsByClassName('add-product-to-cart-form');
+
+  for(let form of addProductForm){
+    form.addEventListener('submit', (event) => {
+      Swal.fire({
+      icon: 'success',
+      title: 'Agregaste un producto a tu carrito'
+      });
+    });
+  };
+</script>

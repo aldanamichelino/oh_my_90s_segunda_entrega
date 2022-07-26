@@ -1,0 +1,41 @@
+<section class="vh-100">
+  <h2 class="mt-4 text-center">Tus pedidos</h2>
+  <% if(orders.length > 0) { %>
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Número de pedido</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Detalle</th>
+            <th scope="col">Total</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+      <tbody>
+          <%  orders.forEach(order => { %>
+              <tr class="table-secondary">
+                <th scope="row"><%= order.number %></th>
+                <td><%= new Date(order.createdAt).toLocaleDateString("es-AR") %></td>
+                <td>
+                  <ul>
+                    <% order.products.forEach(product => { %>
+                      <li class="bold"><%= product.product_name %></li>
+                      <li class="list-unstyled"><%= product.product_description %></li>
+                      <li class="list-unstyled">Cantidad: <%= product.quantity %></li>
+                      <li class="list-unstyled">Precio por unidad: $<%= product.price %></li>
+                    <% }) %>  
+                  </ul>
+                </td>
+                <td>$ <%= order.products.reduce((acc, item) => acc + item.quantity * item.price, 0) %></td>
+                <td>Generada</td>
+              </tr>
+          <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+      <div class="text-center">
+        <h4>Todavía no hiciste ningún pedido.</h4>
+        <a href="/api/carrito">Volver</a>
+      </div>
+  <% } %>
+</section>

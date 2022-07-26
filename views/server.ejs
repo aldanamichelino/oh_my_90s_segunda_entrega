@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link type="text/css" rel="stylesheet" media="screen,projection"/>
+        <title>Información del servidor</title>
+    </head>
+    <body>
+        <div class="d-flex flex-column w-100 jumbotron vh-100">
+            <h3>Puerto de escucha: <%= PORT %></h3>
+            <br>
+            <h3>Url a base de datos: <%= SECURE_MONGODB_URI %></h3>
+            <br>
+            <h3>Mail del admin: <%= ADMIN_EMAIL %></h3>
+            <br>
+            <h3>Tiempo de expiración de sesión: <%= SESSION_TIMEOUT %></h3>
+            <br>
+            <h3>Nombre de la plataforma: <%= process.platform %></h3>
+            <br>
+            <h3>Versión de Node.js: <%= process.version %></h3>
+            <br>
+            <h3>Memoria total reservada: <%= rss %></h3>
+            <br>
+            <h3>Path de ejecución: <%= process.execPath %></h3>
+            <br>
+            <h3>Id del proceso: <%= process.pid %></h3>
+            <br>
+            <h3>Carpeta del proyecto: <%= process.cwd() %></h3>
+            <br>
+            <h3>Número de procesadores disponibles: <%= processors %></h3>
+        </div>
+    </body>
+</html>

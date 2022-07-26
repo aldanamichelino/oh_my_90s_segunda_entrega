@@ -115,8 +115,12 @@
                 </li>
               </ul>
   
-              <form action="/api/carrito/finalizarCompra" method="get">
-                <button type="submit" class="btn btn-lg btn-block text-light" style="background: #bb24e6;">
+              <form action="/api/carrito/finalizarCompra" id="finishPurchase" method="get">
+                <% if(productsInCart && productsInCart.length > 0){ %>
+                  <button type="submit" class="btn btn-lg btn-block text-light" style="background: #bb24e6;">
+                <% } else { %>
+                  <button type="submit" class="btn btn-lg btn-block text-light" style="background: #bb24e6;" disabled>
+                <% } %>
                   Finalizar la compra
                 </button>
               </form>
@@ -128,7 +132,8 @@
 </section>
 
 <script>
-  let deleteFromCartButtons = document.getElementsByClassName('deleteFromCartButton');
+  const deleteFromCartButtons = document.getElementsByClassName('deleteFromCartButton');
+  const finishPurchase = document.getElementById('finishPurchase');
 
   for(let button of deleteFromCartButtons){
       button.addEventListener('click', () => {
@@ -151,4 +156,11 @@
               })
       })
   }
+
+  finishPurchase.addEventListener('submit', () => {
+      Swal.fire({
+      icon: 'success',
+      title: 'Compra realizada'
+      });
+  });
 </script>

@@ -1,15 +1,16 @@
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 require('dotenv').config();
-const { write } = require('../config');
+const { write } = require('../winston/logger.config');
+const { ADMIN_EMAIL, ADMIN_NODEMAILER_PASSWORD } = require('../config');
 
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   port: 587,
   auth: {
-    user: process.env.ADMIN_EMAIL,
-    pass: process.env.ADMIN_NODEMAILER_PASSWORD
+    user: ADMIN_EMAIL,
+    pass: ADMIN_NODEMAILER_PASSWORD
   }
 });
 

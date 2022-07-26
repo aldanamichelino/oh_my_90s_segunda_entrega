@@ -20,13 +20,13 @@ const upload = multer({storage});
 router.post(
     '/register',
     upload.single('avatar'),
-    passport.authenticate('register', {failureRedirect: '/register', failureMessage: true}),
+    passport.authenticate('register', {failureRedirect: '/errorDeRegistro', failureMessage: true}),
     authControllers.register
 );
 
 router.post(
     '/login',
-    passport.authenticate('login', {failureRedirect: '/login', failureMessage: true}),
+    passport.authenticate('login', {failureRedirect: '/errorDeLogin', failureMessage: true}),
     authControllers.login
 )
 

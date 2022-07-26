@@ -8,13 +8,14 @@
 </head>
 <body>
     <div>
-        <h2><strong>Detalle del pedido</strong></h2>
+        <h2><strong>Detalle del pedido n.° <%= orderNumber %></strong></h2>
         <br>
         <h4>Datos del usuarix</h4>
         <div>
             <p><strong><%= `Nombre: ${user.name}` %></strong></p>
             <p><strong><%= `Email: ${user.email}` %></strong></p>
         </div>
+        <h4>Detalles de la compra</h4>
         <ul>
             <% products.forEach(product => {%>
                 <li style="list-style: none;"><%=`Producto: ${product.name}`%></li>

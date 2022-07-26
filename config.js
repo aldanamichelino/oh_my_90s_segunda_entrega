@@ -1,40 +1,22 @@
-require('dotenv').config();
-const logger = require('./winston/winston.config');
+const dotenv = require('dotenv');
+const path = require('path');
 
-const write = (level, message) => {
-    try {
-        switch (level) {
-            case 'info':
-                logger.info(message);
-                break;
-            case 'warn':
-                logger.warn(message);
-                break;
-            case 'error':
-                logger.error(message);
-                break;
-            case 'debug':
-                logger.debug(message);
-                break;
-        }
-    } catch(error) {
-        logger.error(error.message);
-    }
-}
-
+dotenv.config({
+  path: path.resolve(process.cwd(), `${process.env.NODE_ENV.trim()}.env`)
+});
 
 module.exports = {
-  env: {
-    PORT: process.env.PORT || 8080
-  },
-  mongoDB_config: {
-    db_uri: process.env.MONGODB_URI,
-    db_name: process.env.MONGO_DATABASE
-  },
-  cart_statuses: {
-    CART_IN_PROCESS: 'in process',
-    CART_PURCHASED: 'purchased',
-    CART_REJECTED: 'rejected'
-  },
-  write
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT || 8080,
+  DATA_SOURCE: process.env.DATA_SOURCE,
+  MONGODB_URI: process.env.MONGODB_URI,
+  SECURE_MONGODB_URI: process.env.SECURE_MONGODB_URI,
+  MONGO_DATABASE: process.env.MONGO_DATABASE,
+  SESSION_SECRET: process.env.SESSION_SECRET,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  ADMIN_WHATSAPP: process.env.ADMIN_EMAIL,
+  ADMIN_NODEMAILER_PASSWORD: process.env.ADMIN_NODEMAILER_PASSWORD,
+  TWILIO_ACCOUNT_ID: process.env.TWILIO_ACCOUNT_ID,
+  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
+  SESSION_TIMEOUT: process.env.SESSION_TIMEOUT
 }

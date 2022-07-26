@@ -1,10 +1,11 @@
 const twilio = require('twilio');
 require('dotenv').config();
-const { write } = require('../config');
+const { write } = require('../winston/logger.config');
+const { TWILIO_ACCOUNT_ID, TWILIO_AUTH_TOKEN } = require('../config');
 
 
-const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_ID;
-const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const ACCOUNT_SID = TWILIO_ACCOUNT_ID;
+const AUTH_TOKEN = TWILIO_AUTH_TOKEN;
 
 const twilioClient = twilio(ACCOUNT_SID, AUTH_TOKEN);
 
